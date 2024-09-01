@@ -1,0 +1,42 @@
+
+# Deployment configuration
+apiVersion: apps/v1                 # Specifies the API version used for the Deployment resource
+kind: Deployment                    # Indicates that this YAML file defines a Kubernetes Deployment resource.
+metadata:                           # Meta data of deployment
+  name: book-catalog                # Sets the name of the Deployment
+spec:                               # Specs of deployment
+  replicas: 1                       # Specify the number of pod replicas to maintain
+  selector:                         # Configure Selector
+    matchLabels:                    # Specifies the labels that must match for pods to be selected by this Deployment.
+      app: book-catalog             # Indicates that only pods with the label "app: book-catalog " will be managed by this Deployment.
+  template:                         # Define template
+    metadata:                       # Define template metadata
+      labels:                       # Define template labels
+        app: book-catalog           # Label applied to the Pods created by this template
+    spec:                           # Define container specs
+      containers:                   # Define containers
+      - name: book-catalog          # Name of the container within the Pod
+        image: book-catalog:latest  # Docker image to use for the container
+        imagePullPolicy: Never      # Ensures that the image is never pulled from a registry and must be available locally.
+        ports:                      # Define ports
+        - containerPort: 8000       # Port that the container exposes
+        env:                        # Defines environment variables to be passed to the container.
+        - name: DATABASE_URL        # Names the environment variable "DATABASE_URL".
+          value: "postgresql://part_2db_user:i6treB57MTXsjHqoWZyiWQu9B1xQYerk@dpg-cr9c4brv2p9s73b57ih0-a.oregon-postgres.render.com/part_2db"  # Value of the environment variable
+
+---  # Separator between Kubernetes resources in the same file
+
+# Service configuration
+apiVersion: v1                      # Specify the API version for Kubernetes Services
+kind: Service                       # Indicates that this is a Service resource
+metadata:                           # Define service metadata
+  name: book-catalog-service        # Sets the name of the Service
+spec:                               # Contains the specification for the Service, including selectors and ports.
+  selector:                         # Defines the criteria for selecting which pods the Service applies to.
+    app: book-catalog               # Indicates that only pods with the label "app: book-catalog" will be selected by this Service.
+  type: NodePort                # Specifies that the Service should be exposed on a specific port on each node in the cluster.
+  ports:                            # Define ports                    
+    - protocol: TCP                 # Specifies that the Service will use the TCP protocol
+      port: 80                      # Exposes port 80 on the Service
+      targetPort: 8000              # Maps the Service's port 80 to port 8000 on the pod.
+      nodePort: 30001               #Exposes the Service on port 30000 on each node in the cluster.
